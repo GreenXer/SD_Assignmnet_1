@@ -1,0 +1,93 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{setspace}
+
+\title{\textbf{Software Design - Assignment 1\\Customer Relationship Management (CRM)}}
+\author{Computer Science Student}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\newpage
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+\spacing{1.5}
+The purpose of this document is to present the design and implementation of a Customer Relationship Management (CRM) system. This application was developed as the first assignment for the Software Design course. The main goal of the project is to manage a core domain entity, which in our case is the Customer. 
+
+A CRM system is very important for any business because it helps keep track of the clients and all the \textbf{informations} related to them. Without a digital system, finding data about a specific client would take a lot of time. This project implements a simple but well-structured application using object-oriented principles and a layered architecture.
+
+\section{Problem Definition}
+The application manages a set of domain entities. Specifically, it manages Customers. A Customer is a person or a company that buys products or services from our business.
+
+The system must support multiple user roles and allow users to interact with the system according to their permissions. The requirements specify three types of users:
+\begin{itemize}
+    \item \textbf{Visitor} - can view public information but cannot modify data.
+    \item \textbf{Administrator} - has full access to manage the system and perform CRUD operations on all entities.
+    \item \textbf{Employee} (Secondary role) - a domain-specific role that requires authentication and can add or edit customers, but cannot delete them.
+\end{itemize}
+
+\section{Application Architecture}
+The application follows a strict MVC (Model-View-Controller) architecture. The project is implemented in Java, using the Spring Boot framework.
+
+\subsection{Model}
+The model represents the domain of the application. It includes the domain entities, repositories for data access, and the business logic implemented in services. We used Spring Data JPA for the repository layer to connect to an H2 in-memory database.
+
+\subsection{View}
+The view is responsible for presenting information to the user. For this application, the view consists of web pages generated with HTML and Thymeleaf templates. Bootstrap was used to make the interface look presentable and clean.
+
+\subsection{Controller}
+The controllers handle incoming user requests, coordinate the application flow, and delegate the work. The controller \textbf{is depending of} the service layer to execute the business logic. Direct database access from controllers or views is strictly restricted to maintain a clean architecture.
+
+\section{Functional Requirements}
+The system supports functionality for managing the core domain entity (Customer) through the following operations:
+
+\subsection{CRUD Operations}
+The system allows users with appropriate permissions to Create, Read, Update, and Delete customer records. 
+\begin{itemize}
+    \item \textbf{Create}: An employee or admin can add a new customer by filling out a form with Name, Email, Phone, and Company.
+    \item \textbf{Read}: Visitors can list all the customers in a table.
+    \item \textbf{Update}: Employees and admins can edit an existing customer's details.
+    \item \textbf{Delete}: Only administrators have the permission to delete a customer record from the database.
+\end{itemize}
+
+\subsection{Additional Features}
+Besides the basic CRUD operations, the application also implements a Search functionality. Users can filter the customer list by typing a name in the search bar. The system will query the database and return only the customers whose names contain the searched string.
+
+\section{Security and Access Control}
+To enforce the role-based access control, the application integrates Spring Security. Passwords for the users are stored using the BCrypt hashing algorithm to ensure they are secure. Unauthenticated users are treated as Visitors and are only permitted to view the customer list and the login page.
+
+\section{Diagrams}
+As requested by the assignment deliverables, the architecture and workflows of the system are represented using standard UML diagrams.
+
+\subsection{Use Case Diagram}
+The use case diagram shows the system actors (Visitor, Employee, Admin) and the main use cases they can perform. The Visitor can only "View Customers". The Employee can "View Customers", "Add Customer", and "Edit Customer". The Admin inherits all Employee use cases and adds the "Delete Customer" use case.
+
+\subsection{Entity-Relationship Diagram}
+The database structure is very simple. We have a single table named \texttt{customers} with the following columns: \texttt{id} (Primary Key, Auto-increment), \texttt{name} (Varchar), \texttt{email} (Varchar), \texttt{phone} (Varchar), and \texttt{company} (Varchar). 
+
+\subsection{Class Diagram}
+The core domain model consists of the \texttt{Customer} entity class, the \texttt{CustomerRepository} interface, the \texttt{CustomerService} class, and the \texttt{CustomerController} class. The Controller uses the Service, and the Service uses the Repository.
+
+\subsection{Sequence Diagram}
+For the most important workflow, we mapped the "Add New Customer" process. 
+1. The user requests the add form via a GET request to \texttt{/customers/new}.
+2. The Controller returns the HTML form.
+3. The user fills the data and submits a POST request to \texttt{/customers/save}.
+4. The Controller receives the data and calls \texttt{customerService.saveCustomer(customer)}.
+5. The Service calls \texttt{customerRepository.save(customer)}.
+6. The database saves the record and returns the saved entity.
+7. The Controller redirects the user to the \texttt{/customers} list view where the new customer is now visible.
+
+\section{Conclusions}
+In conclusion, the project successfully implements all the requirements from Assignment 1. The use of Spring Boot and Thymeleaf made it easy to separate the concerns according to the MVC pattern. The application is functional and ready to be extended with more entities in the future assignments.
+
+\end{document}
