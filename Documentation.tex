@@ -21,73 +21,88 @@
 
 \section{Introduction}
 \spacing{1.5}
-The purpose of this document is to present the design and implementation of a Customer Relationship Management (CRM) system. This application was developed as the first assignment for the Software Design course. The main goal of the project is to manage a core domain entity, which in our case is the Customer. 
+This is the documentation for the first assignment in Software Design. For this project I choosed to make a Customer Relationship Management (CRM) system because it seemed like a practical idea. Basically, the goal was to manage a domain entity, so I picked the Customer entity.
 
-A CRM system is very important for any business because it helps keep track of the clients and all the \textbf{informations} related to them. Without a digital system, finding data about a specific client would take a lot of time. This project implements a simple but well-structured application using object-oriented principles and a layered architecture.
+Any shop or business needs a CRM to keep track of the clients and all the \textbf{informations} related to them. This project is a simple web application that let us do just that, using basic object-oriented principles.
 
 \section{Problem Definition}
-The application manages a set of domain entities. Specifically, it manages Customers. A Customer is a person or a company that buys products or services from our business.
+The app is pretty straightforward: it manages Customers. A Customer is basically someone who buys things from us, and we need to save their name, email, phone, and company.
 
-The system must support multiple user roles and allow users to interact with the system according to their permissions. The requirements specify three types of users:
+Also, the assignment PDF said we need roles, so I added three of them:
 \begin{itemize}
-    \item \textbf{Visitor} - can view public information but cannot modify data.
-    \item \textbf{Administrator} - has full access to manage the system and perform CRUD operations on all entities.
-    \item \textbf{Employee} (Secondary role) - a domain-specific role that requires authentication and can add or edit customers, but cannot delete them.
+    \item \textbf{Visitor} - someone who just opens the site. They can only see the list, nothing else.
+    \item \textbf{Administrator} - the boss. Can do everything, including deleting customers.
+    \item \textbf{Employee} - they need to login. They can add new customers or edit the mistakes, but they can't delete anything by mistake.
 \end{itemize}
 
 \section{Application Architecture}
-The application follows a strict MVC (Model-View-Controller) architecture. The project is implemented in Java, using the Spring Boot framework.
+I tried to follow the MVC (Model-View-Controller) architecture exactly like it was required. The code is written in Java and I used Spring Boot because it does a lot of the heavy lifting.
 
 \subsection{Model}
-The model represents the domain of the application. It includes the domain entities, repositories for data access, and the business logic implemented in services. We used Spring Data JPA for the repository layer to connect to an H2 in-memory database.
+Here we have the entities and the repositories. For the database I didn't want to complicate myself with installing MySQL on my laptop and configuring users, so I used an H2 in-memory database. It works out of the box with Spring Data JPA.
 
 \subsection{View}
-The view is responsible for presenting information to the user. For this application, the view consists of web pages generated with HTML and Thymeleaf templates. Bootstrap was used to make the interface look presentable and clean.
+For the frontend I just used standard HTML pages with Thymeleaf. I also threw in some Bootstrap classes so it doesn't look like it was made in the 90s. It has a start page, a login, and the tables.
 
 \subsection{Controller}
-The controllers handle incoming user requests, coordinate the application flow, and delegate the work. The controller \textbf{is depending of} the service layer to execute the business logic. Direct database access from controllers or views is strictly restricted to maintain a clean architecture.
+The controllers take the requests from the browser and tell the app what to do. The controller \textbf{is depending of} the service layer, so there is no direct database code in the controller. I think this is what "clean architecture" means.
 
 \section{Functional Requirements}
-The system supports functionality for managing the core domain entity (Customer) through the following operations:
-
 \subsection{CRUD Operations}
-The system allows users with appropriate permissions to Create, Read, Update, and Delete customer records. 
+You can do all the basic CRUD stuff. 
 \begin{itemize}
-    \item \textbf{Create}: An employee or admin can add a new customer by filling out a form with Name, Email, Phone, and Company.
-    \item \textbf{Read}: Visitors can list all the customers in a table.
-    \item \textbf{Update}: Employees and admins can edit an existing customer's details.
-    \item \textbf{Delete}: Only administrators have the permission to delete a customer record from the database.
+    \item \textbf{Create}: If you are logged in as employee or admin, you have a form to add a new customer (Name, Email, Phone, Company).
+    \item \textbf{Read}: Visitors can see the table with the clients.
+    \item \textbf{Update}: You can click "Edit" to fix a typo in a customer's email.
+    \item \textbf{Delete}: The delete button only shows up if you are logged in as admin.
 \end{itemize}
 
-\subsection{Additional Features}
-Besides the basic CRUD operations, the application also implements a Search functionality. Users can filter the customer list by typing a name in the search bar. The system will query the database and return only the customers whose names contain the searched string.
+\subsection{Extra Features}
+I also added a search bar on top of the list. If you type a name, it filters the table. I thought this was the easiest extra feature to implement to get those 2 points.
 
-\section{Security and Access Control}
-To enforce the role-based access control, the application integrates Spring Security. Passwords for the users are stored using the BCrypt hashing algorithm to ensure they are secure. Unauthenticated users are treated as Visitors and are only permitted to view the customer list and the login page.
+\section{Security}
+I used Spring Security to handle the logins. The passwords are encrypted with BCrypt so they are safe in the database. If you are not logged in, spring security just treats you as a Visitor.
 
 \section{Diagrams}
-As requested by the assignment deliverables, the architecture and workflows of the system are represented using standard UML diagrams.
+Here are the diagrams requested in the deliverables section. 
 
 \subsection{Use Case Diagram}
-The use case diagram shows the system actors (Visitor, Employee, Admin) and the main use cases they can perform. The Visitor can only "View Customers". The Employee can "View Customers", "Add Customer", and "Edit Customer". The Admin inherits all Employee use cases and adds the "Delete Customer" use case.
+This shows who can do what. Admin can do everything, Employee can do almost everything, Visitor just watches.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{diagrams/usecase.png}
+    \caption{Use Case Diagram}
+\end{figure}
 
 \subsection{Entity-Relationship Diagram}
-The database structure is very simple. We have a single table named \texttt{customers} with the following columns: \texttt{id} (Primary Key, Auto-increment), \texttt{name} (Varchar), \texttt{email} (Varchar), \texttt{phone} (Varchar), and \texttt{company} (Varchar). 
+I only have one table right now, called \texttt{customers}, with an auto-increment ID.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{diagrams/er.png}
+    \caption{Entity-Relationship Diagram}
+\end{figure}
 
 \subsection{Class Diagram}
-The core domain model consists of the \texttt{Customer} entity class, the \texttt{CustomerRepository} interface, the \texttt{CustomerService} class, and the \texttt{CustomerController} class. The Controller uses the Service, and the Service uses the Repository.
+Here we can see the classes I wrote in Java. \texttt{CustomerController} talks to \texttt{CustomerService}, which talks to \texttt{CustomerRepository}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{diagrams/class.png}
+    \caption{Class Diagram}
+\end{figure}
 
 \subsection{Sequence Diagram}
-For the most important workflow, we mapped the "Add New Customer" process. 
-1. The user requests the add form via a GET request to \texttt{/customers/new}.
-2. The Controller returns the HTML form.
-3. The user fills the data and submits a POST request to \texttt{/customers/save}.
-4. The Controller receives the data and calls \texttt{customerService.saveCustomer(customer)}.
-5. The Service calls \texttt{customerRepository.save(customer)}.
-6. The database saves the record and returns the saved entity.
-7. The Controller redirects the user to the \texttt{/customers} list view where the new customer is now visible.
+This is the flow when someone clicks "Save Customer" in the UI form. It travels through all the layers and saves in H2.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{diagrams/sequence.png}
+    \caption{Sequence Diagram: Add New Customer}
+\end{figure}
 
 \section{Conclusions}
-In conclusion, the project successfully implements all the requirements from Assignment 1. The use of Spring Boot and Thymeleaf made it easy to separate the concerns according to the MVC pattern. The application is functional and ready to be extended with more entities in the future assignments.
+To sum up, the application works and all the required features from the PDF are done. Using Spring Boot was a good idea because it saved me a lot of time on the configuration part. The project is ready to be expanded for Assignment 2.
 
 \end{document}
